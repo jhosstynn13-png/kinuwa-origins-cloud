@@ -15,7 +15,7 @@ export class App implements OnInit {
   }
 
   cargarProductos() {
-    fetch('http://localhost:3000/api/productos')
+    fetch('https://kinuwa-origins-cloud.onrender.com/api/productos')
       .then(respuesta => respuesta.json())
       .then(datos => {
         this.inventario.set(datos);
