@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { createClient } from '@supabase/supabase-js'; 
 
 // Usamos tus credenciales de Supabase
-const supabase = createClient('https://yimuttzzvijmvlxqleor.supabase.co', 'sb_secret_7dRg5makNCUYV8DEV-t8hA_SAemjB6v');
+const supabase = createClient('https://yimuttzzvijmvlxqleor.supabase.co', 'sb_publishable_N1S8_Clx9ZB0HemBFG35-A_qkTtYOEv');
 
 @Component({
   selector: 'app-root',
@@ -17,6 +17,7 @@ export class App implements OnInit {
   
   // Variables de Seguridad (Operación 04) [cite: 67, 68]
   email = '';
+
   password = '';
   usuarioLogueado = signal<any>(null);
 
