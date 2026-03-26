@@ -1,89 +1,83 @@
 <div class="min-h-screen bg-gray-50 font-sans">
 
   @if (!usuarioLogueado()) {
-    <div class="flex items-center justify-center min-h-screen p-6 bg-emerald-900">
-      <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
-        <h2 class="text-2xl font-bold mb-6">Kinuwa Origins Cloud</h2>
-        
-        <div class="space-y-4">
-          <input type="email" [(ngModel)]="email" class="w-full p-2 border rounded" placeholder="Correo">
-          <input type="password" [(ngModel)]="password" class="w-full p-2 border rounded" placeholder="Contraseña">
-          
-          <button (click)="iniciarSesion()" class="w-full bg-emerald-800 text-white py-2 rounded">Entrar como Cliente</button>
-          
-          <div class="relative py-4">
-            <div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div>
-            <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-gray-500">O continúa como</span></div>
+    <div class="flex items-center justify-center min-h-screen p-6">
+      <div class="bg-white p-8 rounded-xl shadow-2xl border border-emerald-100 max-w-md w-full animate-fade-in">
+        <div class="text-center mb-8">
+          <div class="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="text-emerald-600 w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 14 6h7v7a7 7 0 0 1-7 7H7a7 7 0 0 1 4-14"/></svg>
           </div>
+          <h2 class="text-2xl font-bold text-gray-800">Kinuwa Origins</h2>
+          <p class="text-gray-500 text-sm">Acceso seguro al sistema EcoMarket</p>
+        </div>
 
-          <button (click)="entrarComoVisitante()" class="w-full border border-gray-300 py-2 rounded hover:bg-gray-50">
-            Explorar como Visitante (Solo lectura)
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+            <input type="email" [(ngModel)]="email" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="usuario@senati.pe">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <input type="password" [(ngModel)]="password" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="••••••••">
+          </div>
+          
+          <button (click)="iniciarSesion()" class="w-full bg-emerald-800 text-white font-bold py-2 rounded-md hover:bg-emerald-900 transition-colors">
+            Iniciar Sesión
+          </button>
+          <button (click)="registrarUsuario()" class="w-full bg-white text-emerald-800 border border-emerald-800 font-bold py-2 rounded-md hover:bg-emerald-50 transition-colors">
+            Crear Cuenta de Cliente
           </button>
         </div>
       </div>
     </div>
-  }
+  } 
 
   @else {
-    <nav class="bg-emerald-800 text-white p-4 flex justify-between items-center sticky top-0 z-50">
-      <span class="font-bold">Kinuwa Origins - {{ rolActual() | uppercase }}</span>
-      <div class="flex items-center gap-4">
-        @if (rolActual() === 'cliente') {
-          <div class="relative cursor-pointer">
-            🛒 <span class="bg-red-500 text-white text-xs rounded-full px-1">{{ carrito().length }}</span>
-          </div>
-        }
-        <button (click)="cerrarSesion()" class="text-xs border px-2 py-1 rounded">Salir</button>
+    <nav class="bg-emerald-800 text-white p-4 shadow-md sticky top-0 z-50">
+      <div class="max-w-5xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><path d="M11 20A7 7 0 0 1 14 6h7v7a7 7 0 0 1-7 7H7a7 7 0 0 1 4-14"/></svg>
+          <span class="font-bold text-xl">Kinuwa Origins</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-xs hidden md:inline text-emerald-200">{{ usuarioLogueado().email }}</span>
+          <button (click)="cerrarSesion()" class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1 rounded text-sm transition-colors border border-emerald-500">
+            Cerrar Sesión
+          </button>
+        </div>
       </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto p-6 flex flex-col md:flex-row gap-8">
-      
-      <div class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (prod of inventario(); track prod.id) {
-          <div class="bg-white p-4 shadow rounded-lg flex flex-col">
-            <img [src]="prod.imagen" class="h-40 w-full object-cover rounded mb-4">
-            <h3 class="font-bold">{{ prod.nombre }}</h3>
-            <p class="text-emerald-700 font-bold">S/ {{ prod.precio | number:'1.2-2' }}</p>
-            
-            <div class="mt-auto pt-4 flex gap-2">
-              @if (rolActual() === 'cliente') {
-                <button (click)="agregarAlCarrito(prod)" class="flex-1 bg-emerald-600 text-white py-1 rounded text-sm hover:bg-emerald-700">
-                  Añadir al Carrito
-                </button>
-              }
-
-              @if (rolActual() === 'vendedor' || rolActual() === 'admin') {
-                <button class="bg-amber-500 text-white px-2 py-1 rounded text-xs">Editar</button>
-                <button class="bg-red-500 text-white px-2 py-1 rounded text-xs">Eliminar</button>
-              }
-
-              @if (rolActual() === 'visitante') {
-                <span class="text-xs text-gray-400 italic">Regístrate para comprar</span>
-              }
+    <main class="mt-8 max-w-4xl mx-auto p-6">
+      <div class="animate-fade-in">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Catálogo de Productos Cloud</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          @for (prod of inventario(); track prod.id) {
+            <div class="bg-white rounded-lg shadow border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+              <div class="relative">
+                <img [src]="prod.imagen" [alt]="prod.nombre" class="w-full h-48 object-cover" />
+                @if (prod.stock !== undefined) {
+                  <span class="absolute top-2 right-2 bg-white text-xs font-bold px-2 py-1 rounded shadow text-gray-600">
+                    Stock: {{ prod.stock }}
+                  </span>
+                }
+              </div>
+              <div class="p-4 flex flex-col h-[140px]">
+                <h3 class="font-bold text-lg text-gray-800">{{ prod.nombre }}</h3>
+                <p class="text-sm text-gray-500 mb-2 line-clamp-2">{{ prod.descripcion }}</p>
+                <div class="mt-auto">
+                  <span class="font-bold text-emerald-700 text-xl">S/ {{ prod.precio | number:'1.2-2' }}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        }
-      </div>
-
-      @if (rolActual() === 'cliente' && carrito().length > 0) {
-        <div class="w-full md:w-80 bg-white p-6 shadow-xl rounded-xl h-fit sticky top-24 border-t-4 border-emerald-600">
-          <h3 class="font-bold text-lg mb-4 border-b pb-2">Tu Carrito</h3>
-          @for (item of carrito(); track $index) {
-            <div class="flex justify-between text-sm mb-2">
-              <span>{{ item.nombre }}</span>
-              <span class="font-mono">S/ {{ item.precio }}</span>
+          } @empty {
+            <div class="col-span-3 text-center py-10 text-gray-500">
+              <p>Conectando con la infraestructura de AWS/Render...</p>
             </div>
           }
-          <div class="border-t mt-4 pt-4 flex justify-between font-bold text-xl text-emerald-800">
-            <span>Total:</span>
-            <span>S/ {{ totalCarrito | number:'1.2-2' }}</span>
-          </div>
-          <button class="w-full bg-emerald-800 text-white mt-6 py-3 rounded-lg font-bold hover:shadow-lg">
-            Finalizar Pedido
-          </button>
         </div>
-      }
-    </div>
+      </div>
+    </main>
   }
 </div>
