@@ -1,5 +1,5 @@
 import { Component, signal, OnInit, computed } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, UpperCasePipe } from '@angular/common'; // Solución 1: Importamos UpperCasePipe
 import { FormsModule } from '@angular/forms'; 
 import { createClient } from '@supabase/supabase-js'; 
 
@@ -8,7 +8,7 @@ const supabase = createClient('https://yimuttzzvijmvlxqleor.supabase.co', 'sb_pu
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, UpperCasePipe, FormsModule], // Solución 1: Lo añadimos a los imports
   templateUrl: './app.html' 
 })
 export class App implements OnInit {
@@ -16,7 +16,9 @@ export class App implements OnInit {
   inventario = signal<any[]>([]);
   carrito = signal<any[]>([]);
   usuarioLogueado = signal<any>(null);
-  rolActual = signal<'visitante' | 'cliente' | 'admin'>('visitante');
+  
+  // Solución 2: Añadimos 'vendedor' a la lista de roles permitidos
+  rolActual = signal<'visitante' | 'cliente' | 'vendedor' | 'admin'>('visitante');
 
   // --- VARIABLES DE FORMULARIO ---
   email = '';
@@ -77,9 +79,12 @@ export class App implements OnInit {
     if (error) alert("Acceso denegado: " + error.message);
     else {
       this.usuarioLogueado.set(data.user);
-      // Lógica de Rol: Si el correo es el tuyo, eres Admin, si no, Cliente.
-      if (this.email === 'tu-correo-admin@gmail.com') {
+      
+      // Lógica de Rol: Ejemplos de asignación para la Operación 04
+      if (this.email === 'admin@senati.pe') {
         this.rolActual.set('admin');
+      } else if (this.email === 'vendedor@senati.pe') {
+        this.rolActual.set('vendedor');
       } else {
         this.rolActual.set('cliente');
       }
@@ -99,6 +104,6 @@ export class App implements OnInit {
     await supabase.auth.signOut();
     this.usuarioLogueado.set(null);
     this.rolActual.set('visitante');
-    this.carrito.set([]); // Limpiamos carrito al salir
+    this.carrito.set([]); 
   }
 }
