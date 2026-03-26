@@ -10,7 +10,7 @@ app.use(express.json());
 // CONFIGURACIÓN REAL DE TU PROYECTO (Sacado de tu captura)
 const supabaseUrl = 'https://yimuttzzvijmvlxqleor.supabase.co';
 // Usa la llave "anon" que aparece en tu sección de Settings > API
-const supabaseKey = 'sb_secret_7dRg5makNCUYV8DEV-t8hA_SAemjB6v'; 
+const supabaseKey = 'sb_publishable_N1S8_Clx9ZB0HemBFG35-A_qkTtYOEv'; 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Ruta para obtener productos
