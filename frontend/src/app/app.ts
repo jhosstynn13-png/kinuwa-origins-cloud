@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, computed } from '@angular/core'; // Añadimos computed para el total
+import { Component, signal, OnInit, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { createClient } from '@supabase/supabase-js'; 
