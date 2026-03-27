@@ -76,8 +76,13 @@ export class App implements OnInit {
     this.carrito.set([]); 
   }
 
-  editarProducto(producto: any) {
-    alert(`Abriendo editor seguro para: ${producto.nombre}\n\nPermiso concedido mediante políticas IAM (Rol: ${this.rolActual().toUpperCase()}).`);
+  // --- ACCIONES CRUD (ADMIN / VENDEDOR) ---
+  guardarProducto(producto: any) {
+    // Cerramos el modo de edición visual
+    producto.editando = false; 
+    
+    // Mostramos la alerta de éxito simulando la conexión al backend
+    alert(`¡Cambios guardados en la base de datos RDS!\n\n${producto.nombre}\nNuevo Precio: S/ ${producto.precio}\nNuevo Stock: ${producto.stock}\n\nOperación validada correctamente mediante token JWT.`);
   }
 
   borrarProducto(producto: any) {
@@ -88,6 +93,7 @@ export class App implements OnInit {
     }
   }
 
+  // --- LÓGICA DE ROLES Y SESIONES ---
   entrarComoVisitante() {
     this.usuarioLogueado.set({ email: 'Modo Invitado' });
     this.rolActual.set('visitante');

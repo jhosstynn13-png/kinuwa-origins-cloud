@@ -97,9 +97,17 @@
               
               <div class="relative overflow-hidden">
                 <img [src]="prod.imagen" [alt]="prod.nombre" class="w-full aspect-[4/3] object-cover transition-transform group-hover:scale-105 duration-500"/>
+                
                 @if (prod.stock !== undefined) {
                   <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-md text-xs font-bold px-3 py-1.5 rounded-xl shadow flex items-center gap-x-1">
-                    <span class="text-emerald-500">●</span> <span class="text-gray-700">Stock: {{ prod.stock }}</span>
+                    <span class="text-emerald-500">●</span> 
+                    <span class="text-gray-700 flex items-center gap-1">Stock: 
+                      @if (prod.editando) {
+                        <input type="number" [(ngModel)]="prod.stock" class="w-14 bg-gray-100 border border-emerald-400 rounded px-1 text-center outline-none">
+                      } @else {
+                        {{ prod.stock }}
+                      }
+                    </span>
                   </div>
                 }
               </div>
@@ -107,8 +115,16 @@
               <div class="p-6 flex-1 flex flex-col">
                 <h3 class="font-bold text-xl text-gray-900 line-clamp-2">{{ prod.nombre }}</h3>
                 <p class="text-gray-500 text-sm mt-2 line-clamp-2 flex-1">{{ prod.descripcion }}</p>
+                
                 <div class="mt-4 pt-4 border-t border-gray-100 flex items-baseline justify-between mb-4">
-                  <span class="text-3xl font-bold text-emerald-700">S/ {{ prod.precio | number:'1.2-2' }}</span>
+                  @if (prod.editando) {
+                    <div class="flex items-center gap-2">
+                      <span class="text-2xl font-bold text-emerald-700">S/</span>
+                      <input type="number" [(ngModel)]="prod.precio" class="w-24 text-2xl font-bold text-emerald-700 bg-emerald-50 border-b-2 border-emerald-500 rounded px-2 outline-none">
+                    </div>
+                  } @else {
+                    <span class="text-3xl font-bold text-emerald-700">S/ {{ prod.precio | number:'1.2-2' }}</span>
+                  }
                 </div>
 
                 <div class="flex gap-2 w-full mt-auto">
@@ -117,10 +133,17 @@
                       Añadir al Carrito
                     </button>
                   }
+                  
                   @if (rolActual() === 'vendedor' || rolActual() === 'admin') {
-                    <button (click)="editarProducto(prod)" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-2xl transition-colors">Editar</button>
-                    <button (click)="borrarProducto(prod)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-2xl transition-colors">Borrar</button>
+                    @if (prod.editando) {
+                      <button (click)="guardarProducto(prod)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl transition-colors">Guardar</button>
+                      <button (click)="prod.editando = false" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-2xl transition-colors">Cancelar</button>
+                    } @else {
+                      <button (click)="prod.editando = true" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-2xl transition-colors">Editar</button>
+                      <button (click)="borrarProducto(prod)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-2xl transition-colors">Borrar</button>
+                    }
                   }
+
                   @if (rolActual() === 'visitante') {
                     <button disabled class="w-full bg-gray-50 text-gray-400 border border-gray-200 font-semibold py-3 rounded-2xl cursor-not-allowed">
                       Regístrate para comprar
