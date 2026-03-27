@@ -25,12 +25,10 @@ export class App implements OnInit {
   nuevoProducto = { nombre: '', descripcion: '', precio: 0, stock: 0, imagen: '' };
 
   // --- CÁLCULOS AUTOMÁTICOS MEJORADOS ---
-  // Suma el precio multiplicado por la cantidad de cada producto
   totalCarrito = computed(() => {
     return this.carrito().reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
   });
 
-  // Cuenta cuántos artículos hay en total (ej. 3 galletas + 1 harina = 4 items)
   cantidadTotal = computed(() => {
     return this.carrito().reduce((acc, item) => acc + item.cantidad, 0);
   });
@@ -55,16 +53,13 @@ export class App implements OnInit {
     }
 
     this.carrito.update(items => {
-      // Buscamos si el producto ya está en el carrito
       const itemExistente = items.find(item => item.id === producto.id);
       
       if (itemExistente) {
-        // Si existe, aumentamos su cantidad
         return items.map(item => 
           item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
         );
       } else {
-        // Si es nuevo, lo agregamos con cantidad 1
         return [...items, { ...producto, cantidad: 1 }];
       }
     });
@@ -82,10 +77,7 @@ export class App implements OnInit {
 
   // --- ACCIONES CRUD (ADMIN / VENDEDOR) ---
   guardarProducto(producto: any) {
-    // Cerramos el modo de edición visual
     producto.editando = false; 
-    
-    // Mostramos la alerta de éxito simulando la conexión al backend
     alert(`¡Cambios guardados en la base de datos RDS!\n\n${producto.nombre}\nNuevo Precio: S/ ${producto.precio}\nNuevo Stock: ${producto.stock}\n\nOperación validada correctamente mediante token JWT.`);
   }
 
@@ -158,6 +150,7 @@ export class App implements OnInit {
     else alert("¡Registro exitoso! Ya puedes iniciar sesión.");
   }
 
+  // --- ACTULIZADO: INICIAR SESIÓN Y VERIFICAR ---
   async iniciarSesion() {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: this.email,
@@ -166,7 +159,8 @@ export class App implements OnInit {
     if (error) alert("Acceso denegado: " + error.message);
     else {
       this.usuarioLogueado.set(data.user);
-      this.asignarRol(this.email);
+      // Le pasamos el ID del usuario real para buscar su rol en la BD
+      this.asignarRol(data.user.id, this.email);
     }
   }
 
@@ -174,17 +168,34 @@ export class App implements OnInit {
     const { data } = await supabase.auth.getSession();
     if (data.session) {
       this.usuarioLogueado.set(data.session.user);
-      this.asignarRol(data.session.user.email || '');
+      // Le pasamos el ID si el usuario recarga la página
+      this.asignarRol(data.session.user.id, data.session.user.email || '');
     }
   }
 
-  asignarRol(correo: string) {
-    if (correo.includes('admin')) {
-      this.rolActual.set('admin');
-    } else if (correo.includes('vendedor')) {
-      this.rolActual.set('vendedor');
-    } else {
-      this.rolActual.set('cliente');
+  // --- ACTUALIZADO: ASIGNACIÓN DE ROLES REAL DESDE LA BASE DE DATOS ---
+  async asignarRol(userId: string, correo: string) {
+    // 1. Vamos a tu tabla 'usuarios' a buscar el rol de esta persona
+    const { data: perfil, error } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', userId)
+      .single();
+
+    // 2. Si lo encuentra en tu base de datos, usamos ese rol EXACTO
+    if (perfil && perfil.rol) {
+      this.rolActual.set(perfil.rol as any);
+      console.log("Rol obtenido de BD:", perfil.rol);
+    } 
+    // 3. Sistema de respaldo (por si el usuario es nuevo y aún no lo metes a la tabla)
+    else {
+      if (correo.includes('admin')) {
+        this.rolActual.set('admin');
+      } else if (correo.includes('vendedor')) {
+        this.rolActual.set('vendedor');
+      } else {
+        this.rolActual.set('cliente');
+      }
     }
   }
 
