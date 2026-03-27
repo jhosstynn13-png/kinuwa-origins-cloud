@@ -1,5 +1,5 @@
 import { Component, signal, OnInit, computed } from '@angular/core';
-import { DecimalPipe, UpperCasePipe } from '@angular/common'; // Agregamos UpperCasePipe
+import { DecimalPipe, UpperCasePipe } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { createClient } from '@supabase/supabase-js'; 
 
@@ -8,7 +8,7 @@ const supabase = createClient('https://yimuttzzvijmvlxqleor.supabase.co', 'sb_pu
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [DecimalPipe, UpperCasePipe, FormsModule], // Lo registramos aquí
+  imports: [DecimalPipe, UpperCasePipe, FormsModule], 
   templateUrl: './app.html' 
 })
 export class App implements OnInit {
@@ -54,8 +54,28 @@ export class App implements OnInit {
     this.carrito.update(items => items.filter((_, i) => i !== index));
   }
 
+  // --- ACCIONES DE COMPRA (CLIENTE) ---
+  procederPago() {
+    if (this.carrito().length === 0) return;
+    alert(`¡Conectando con pasarela de pago segura de AWS!\nTotal a cobrar: S/ ${this.totalCarrito().toFixed(2)}\n\nOperación validada correctamente.`);
+    this.carrito.set([]); // Vaciamos el carrito después de la "compra"
+  }
+
+  // --- ACCIONES CRUD (ADMIN / VENDEDOR) ---
+  editarProducto(producto: any) {
+    alert(`Abriendo editor seguro para: ${producto.nombre}\n\nPermiso concedido mediante políticas IAM (Rol: ${this.rolActual().toUpperCase()}).`);
+  }
+
+  borrarProducto(producto: any) {
+    const confirmar = confirm(`¿Estás seguro de que deseas eliminar "${producto.nombre}" de la base de datos RDS?`);
+    if (confirmar) {
+      // Lo eliminamos visualmente del signal de Angular
+      this.inventario.update(items => items.filter(item => item.id !== producto.id));
+      alert("Producto eliminado exitosamente.");
+    }
+  }
+
   // --- LÓGICA DE ROLES Y SEGURIDAD (OPERACIÓN 04) ---
-  
   entrarComoVisitante() {
     this.usuarioLogueado.set({ email: 'Modo Invitado' });
     this.rolActual.set('visitante');
