@@ -118,8 +118,8 @@
                     </button>
                   }
                   @if (rolActual() === 'vendedor' || rolActual() === 'admin') {
-                    <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-2xl transition-colors">Editar</button>
-                    <button class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-2xl transition-colors">Borrar</button>
+                    <button (click)="editarProducto(prod)" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-2xl transition-colors">Editar</button>
+                    <button (click)="borrarProducto(prod)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-2xl transition-colors">Borrar</button>
                   }
                   @if (rolActual() === 'visitante') {
                     <button disabled class="w-full bg-gray-50 text-gray-400 border border-gray-200 font-semibold py-3 rounded-2xl cursor-not-allowed">
@@ -169,7 +169,7 @@
                   <span class="text-gray-500 font-medium">Total a pagar</span>
                   <span class="text-3xl font-bold text-emerald-700">S/ {{ totalCarrito() | number:'1.2-2' }}</span>
                 </div>
-                <button class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/25 transition-all active:scale-[0.98]">
+                <button (click)="procederPago()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/25 transition-all active:scale-[0.98]">
                   Proceder al Pago
                 </button>
               </div>
