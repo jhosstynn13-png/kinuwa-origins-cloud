@@ -20,13 +20,15 @@ export class App implements OnInit {
   email = '';
   password = '';
 
+  // --- VARIABLES PARA CREAR PRODUCTO ---
+  mostrandoFormulario = signal(false);
+  nuevoProducto = { nombre: '', descripcion: '', precio: 0, stock: 0, imagen: '' };
+
   // --- CÁLCULOS AUTOMÁTICOS MEJORADOS ---
-  // Suma el precio multiplicado por la cantidad de cada producto
   totalCarrito = computed(() => {
     return this.carrito().reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
   });
 
-  // Cuenta cuántos artículos hay en total (ej. 3 galletas + 1 harina = 4 items)
   cantidadTotal = computed(() => {
     return this.carrito().reduce((acc, item) => acc + item.cantidad, 0);
   });
@@ -51,16 +53,13 @@ export class App implements OnInit {
     }
 
     this.carrito.update(items => {
-      // Buscamos si el producto ya está en el carrito
       const itemExistente = items.find(item => item.id === producto.id);
       
       if (itemExistente) {
-        // Si existe, aumentamos su cantidad
         return items.map(item => 
           item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
         );
       } else {
-        // Si es nuevo, lo agregamos con cantidad 1
         return [...items, { ...producto, cantidad: 1 }];
       }
     });
@@ -78,10 +77,7 @@ export class App implements OnInit {
 
   // --- ACCIONES CRUD (ADMIN / VENDEDOR) ---
   guardarProducto(producto: any) {
-    // Cerramos el modo de edición visual
     producto.editando = false; 
-    
-    // Mostramos la alerta de éxito simulando la conexión al backend
     alert(`¡Cambios guardados en la base de datos RDS!\n\n${producto.nombre}\nNuevo Precio: S/ ${producto.precio}\nNuevo Stock: ${producto.stock}\n\nOperación validada correctamente mediante token JWT.`);
   }
 
@@ -91,6 +87,33 @@ export class App implements OnInit {
       this.inventario.update(items => items.filter(item => item.id !== producto.id));
       alert("Producto eliminado exitosamente.");
     }
+  }
+
+  // --- NUEVO: FUNCIONES PARA AÑADIR PRODUCTO (SOLO ADMIN) ---
+  abrirFormulario() {
+    this.mostrandoFormulario.set(true);
+  }
+
+  cancelarFormulario() {
+    this.mostrandoFormulario.set(false);
+    this.nuevoProducto = { nombre: '', descripcion: '', precio: 0, stock: 0, imagen: '' };
+  }
+
+  crearProducto() {
+    if (!this.nuevoProducto.nombre || !this.nuevoProducto.precio || !this.nuevoProducto.imagen) {
+      return alert("Por favor, llena el nombre, el precio y coloca el link de la imagen.");
+    }
+    
+    const productoCreado = {
+      ...this.nuevoProducto,
+      id: Date.now() // Simulamos un ID único generado por la Base de Datos
+    };
+
+    // Lo agregamos visualmente al catálogo junto a los otros
+    this.inventario.update(items => [...items, productoCreado]);
+    
+    alert(`¡Producto "${productoCreado.nombre}" creado exitosamente!\n\nImagen procesada hacia el Bucket S3 y datos guardados en RDS (Operación 05).`);
+    this.cancelarFormulario();
   }
 
   // --- LÓGICA DE ROLES Y SESIONES ---

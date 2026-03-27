@@ -91,6 +91,14 @@
           </div>
         </div>
 
+        @if (rolActual() === 'admin') {
+          <div class="mb-6">
+            <button (click)="abrirFormulario()" class="bg-emerald-800 text-white px-6 py-3 rounded-2xl font-bold hover:bg-emerald-900 transition-colors shadow-lg shadow-emerald-900/20 flex items-center gap-2">
+              <span class="text-xl">+</span> Añadir Nuevo Producto
+            </button>
+          </div>
+        }
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           @for (prod of inventario(); track prod.id) {
             <div class="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-emerald-200 hover:shadow-2xl transition-all duration-300 flex flex-col">
@@ -204,6 +212,54 @@
             }
           </div>
         </aside>
+      }
+
+      @if (mostrandoFormulario()) {
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              📦 Nuevo Producto
+            </h3>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nombre del Producto</label>
+                <input type="text" [(ngModel)]="nuevoProducto.nombre" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Descripción</label>
+                <input type="text" [(ngModel)]="nuevoProducto.descripcion" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+              </div>
+              
+              <div class="flex gap-4">
+                <div class="flex-1">
+                  <label class="block text-sm font-bold text-gray-700 mb-1">Precio (S/)</label>
+                  <input type="number" [(ngModel)]="nuevoProducto.precio" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+                </div>
+                <div class="flex-1">
+                  <label class="block text-sm font-bold text-gray-700 mb-1">Stock</label>
+                  <input type="number" [(ngModel)]="nuevoProducto.stock" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">URL de la Imagen (Bucket S3)</label>
+                <input type="text" [(ngModel)]="nuevoProducto.imagen" placeholder="https://ejemplo.com/foto.jpg" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+                <p class="text-xs text-gray-400 mt-2 font-medium">Pega aquí el enlace de la imagen para simular la carga desde Amazon S3.</p>
+              </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+              <button (click)="crearProducto()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95">
+                Guardar
+              </button>
+              <button (click)="cancelarFormulario()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       }
 
     </main>
