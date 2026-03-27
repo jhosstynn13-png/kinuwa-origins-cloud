@@ -25,10 +25,12 @@ export class App implements OnInit {
   nuevoProducto = { nombre: '', descripcion: '', precio: 0, stock: 0, imagen: '' };
 
   // --- CÁLCULOS AUTOMÁTICOS MEJORADOS ---
+  // Suma el precio multiplicado por la cantidad de cada producto
   totalCarrito = computed(() => {
     return this.carrito().reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
   });
 
+  // Cuenta cuántos artículos hay en total (ej. 3 galletas + 1 harina = 4 items)
   cantidadTotal = computed(() => {
     return this.carrito().reduce((acc, item) => acc + item.cantidad, 0);
   });
@@ -53,13 +55,16 @@ export class App implements OnInit {
     }
 
     this.carrito.update(items => {
+      // Buscamos si el producto ya está en el carrito
       const itemExistente = items.find(item => item.id === producto.id);
       
       if (itemExistente) {
+        // Si existe, aumentamos su cantidad
         return items.map(item => 
           item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
         );
       } else {
+        // Si es nuevo, lo agregamos con cantidad 1
         return [...items, { ...producto, cantidad: 1 }];
       }
     });
@@ -77,7 +82,10 @@ export class App implements OnInit {
 
   // --- ACCIONES CRUD (ADMIN / VENDEDOR) ---
   guardarProducto(producto: any) {
+    // Cerramos el modo de edición visual
     producto.editando = false; 
+    
+    // Mostramos la alerta de éxito simulando la conexión al backend
     alert(`¡Cambios guardados en la base de datos RDS!\n\n${producto.nombre}\nNuevo Precio: S/ ${producto.precio}\nNuevo Stock: ${producto.stock}\n\nOperación validada correctamente mediante token JWT.`);
   }
 
@@ -99,20 +107,38 @@ export class App implements OnInit {
     this.nuevoProducto = { nombre: '', descripcion: '', precio: 0, stock: 0, imagen: '' };
   }
 
-  crearProducto() {
+  async crearProducto() {
     if (!this.nuevoProducto.nombre || !this.nuevoProducto.precio || !this.nuevoProducto.imagen) {
       return alert("Por favor, llena el nombre, el precio y coloca el link de la imagen.");
     }
     
-    const productoCreado = {
-      ...this.nuevoProducto,
-      id: Date.now() // Simulamos un ID único generado por la Base de Datos
-    };
+    // 1. Enviamos los datos reales a tu tabla 'productos' en Supabase
+    const { data, error } = await supabase
+      .from('productos')
+      .insert([
+        {
+          nombre: this.nuevoProducto.nombre,
+          descripcion: this.nuevoProducto.descripcion,
+          precio: this.nuevoProducto.precio,
+          stock: this.nuevoProducto.stock,
+          imagen: this.nuevoProducto.imagen
+        }
+      ])
+      .select(); // Le pedimos a Supabase que nos devuelva el producto ya guardado (con su ID real)
 
-    // Lo agregamos visualmente al catálogo junto a los otros
-    this.inventario.update(items => [...items, productoCreado]);
+    // 2. Verificamos si hubo un error en la base de datos
+    if (error) {
+      console.error("Error al guardar en BD:", error);
+      return alert("Hubo un error al guardar en la Base de Datos: " + error.message);
+    }
+
+    // 3. Si se guardó con éxito, lo agregamos visualmente a la pantalla
+    if (data && data.length > 0) {
+      this.inventario.update(items => [...items, data[0]]);
+      alert(`¡Éxito! Producto "${data[0].nombre}" guardado permanentemente en la Base de Datos Supabase (RDS).`);
+    }
     
-    alert(`¡Producto "${productoCreado.nombre}" creado exitosamente!\n\nImagen procesada hacia el Bucket S3 y datos guardados en RDS (Operación 05).`);
+    // Limpiamos y cerramos el formulario
     this.cancelarFormulario();
   }
 
