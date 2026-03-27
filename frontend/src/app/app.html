@@ -71,9 +71,17 @@
           <div class="hidden md:flex items-center bg-gray-50 text-gray-600 text-sm font-medium px-4 py-2 rounded-full border border-gray-200">
             {{ usuarioLogueado().email }}
           </div>
-          <button (click)="cerrarSesion()" class="flex items-center gap-x-2 px-5 py-2.5 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 text-gray-700 hover:text-red-600 rounded-full text-sm font-semibold transition-colors">
-            Cerrar Sesión
-          </button>
+          
+          @if (rolActual() === 'visitante') {
+            <button (click)="cerrarSesion()" class="flex items-center gap-x-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-full text-sm font-bold transition-colors">
+              Iniciar Sesión
+            </button>
+          } @else {
+            <button (click)="cerrarSesion()" class="flex items-center gap-x-2 px-5 py-2.5 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200 text-gray-700 hover:text-red-600 rounded-full text-sm font-semibold transition-colors">
+              Cerrar Sesión
+            </button>
+          }
+
         </div>
       </div>
     </nav>
