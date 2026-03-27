@@ -12,21 +12,23 @@ const supabase = createClient('https://yimuttzzvijmvlxqleor.supabase.co', 'sb_pu
   templateUrl: './app.html' 
 })
 export class App implements OnInit {
-  // --- SEÑALES (Estado de la App) ---
   inventario = signal<any[]>([]);
-  carrito = signal<any[]>([]);
+  carrito = signal<any[]>([]); 
   usuarioLogueado = signal<any>(null);
-  
-  // Definimos los 4 roles exactos para la Operación 04
   rolActual = signal<'visitante' | 'cliente' | 'vendedor' | 'admin'>('visitante');
 
-  // --- VARIABLES DE FORMULARIO ---
   email = '';
   password = '';
 
-  // --- CÁLCULOS AUTOMÁTICOS ---
+  // --- CÁLCULOS AUTOMÁTICOS MEJORADOS ---
+  // Suma el precio multiplicado por la cantidad de cada producto
   totalCarrito = computed(() => {
-    return this.carrito().reduce((acc, item) => acc + item.precio, 0);
+    return this.carrito().reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+  });
+
+  // Cuenta cuántos artículos hay en total (ej. 3 galletas + 1 harina = 4 items)
+  cantidadTotal = computed(() => {
+    return this.carrito().reduce((acc, item) => acc + item.cantidad, 0);
   });
 
   ngOnInit() {
@@ -34,7 +36,6 @@ export class App implements OnInit {
     this.verificarSesion(); 
   }
 
-  // --- LÓGICA DE NEGOCIO ---
   cargarProductos() {
     fetch('https://kinuwa-origins-cloud.onrender.com/api/productos')
       .then(respuesta => respuesta.json())
@@ -42,26 +43,39 @@ export class App implements OnInit {
       .catch(error => console.error('Error de conexión:', error));
   }
 
+  // --- LÓGICA DE CARRITO AGRUPADO ---
   agregarAlCarrito(producto: any) {
     if (this.rolActual() === 'visitante') {
       alert("⚠️ Los visitantes solo pueden ver el catálogo. ¡Regístrate como cliente para comprar!");
       return;
     }
-    this.carrito.update(items => [...items, producto]);
+
+    this.carrito.update(items => {
+      // Buscamos si el producto ya está en el carrito
+      const itemExistente = items.find(item => item.id === producto.id);
+      
+      if (itemExistente) {
+        // Si existe, aumentamos su cantidad
+        return items.map(item => 
+          item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
+        );
+      } else {
+        // Si es nuevo, lo agregamos con cantidad 1
+        return [...items, { ...producto, cantidad: 1 }];
+      }
+    });
   }
 
   quitarDelCarrito(index: number) {
     this.carrito.update(items => items.filter((_, i) => i !== index));
   }
 
-  // --- ACCIONES DE COMPRA (CLIENTE) ---
   procederPago() {
     if (this.carrito().length === 0) return;
     alert(`¡Conectando con pasarela de pago segura de AWS!\nTotal a cobrar: S/ ${this.totalCarrito().toFixed(2)}\n\nOperación validada correctamente.`);
-    this.carrito.set([]); // Vaciamos el carrito después de la "compra"
+    this.carrito.set([]); 
   }
 
-  // --- ACCIONES CRUD (ADMIN / VENDEDOR) ---
   editarProducto(producto: any) {
     alert(`Abriendo editor seguro para: ${producto.nombre}\n\nPermiso concedido mediante políticas IAM (Rol: ${this.rolActual().toUpperCase()}).`);
   }
@@ -69,13 +83,11 @@ export class App implements OnInit {
   borrarProducto(producto: any) {
     const confirmar = confirm(`¿Estás seguro de que deseas eliminar "${producto.nombre}" de la base de datos RDS?`);
     if (confirmar) {
-      // Lo eliminamos visualmente del signal de Angular
       this.inventario.update(items => items.filter(item => item.id !== producto.id));
       alert("Producto eliminado exitosamente.");
     }
   }
 
-  // --- LÓGICA DE ROLES Y SEGURIDAD (OPERACIÓN 04) ---
   entrarComoVisitante() {
     this.usuarioLogueado.set({ email: 'Modo Invitado' });
     this.rolActual.set('visitante');
@@ -111,7 +123,6 @@ export class App implements OnInit {
     }
   }
 
-  // Función para simular roles en base al correo
   asignarRol(correo: string) {
     if (correo.includes('admin')) {
       this.rolActual.set('admin');
@@ -126,6 +137,6 @@ export class App implements OnInit {
     await supabase.auth.signOut();
     this.usuarioLogueado.set(null);
     this.rolActual.set('visitante');
-    this.carrito.set([]); // Vaciamos el carrito al salir
+    this.carrito.set([]); 
   }
 }
